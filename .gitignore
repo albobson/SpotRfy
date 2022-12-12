@@ -12,3 +12,5 @@ data/lasty/Inferences.json
 data/lasty/Identity.json
 data/lasty/Identifiers.json
 data/lasty/Follow.json
+.httr-oauth
+scripts/221212_dont_upload.R
