@@ -29,6 +29,16 @@ library(plotly)
     ##      popular songs. How much do you _actually_ care for an artist?
 
 
+## Thoughts from today:
+  ## The spotify API is kind of janky and non-specific
+  ##
+  ## It's possible to generate some cool plots but I don't think it will be 
+  ## possible to do much without looking at the total dataset
+  ##
+  ## While I'm waiting for the full dataset, I'll play around with the 'recent'
+  ## dataset
+
+
 source("../SpotRfy/scripts/221212_dont_upload.R")
 get_spotify_credentials()
 
@@ -127,3 +137,9 @@ ggplotly(
     ggtitle("Years Since Track Release by Rank")
 )
 
+ggplot(top50lt, aes(x = rank, y = years_since_release, fill = artist.name)) +
+  geom_bar(stat = 'identity') +
+  theme_light() +
+  theme(legend.position = 'none') +
+  ylab("years since track release") +
+  ggtitle("Years Since Track Release by Rank")
