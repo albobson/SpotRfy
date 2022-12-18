@@ -9,4 +9,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Background
 
+Every year, Spotify releases an end of the year "Spotify Wrapped", which is a collection of stats on regarding your listening habits over the past year. A few friends and I feel like the stats are a little fishy, or at least, aren't entirely expected. For example, my top artist of the year in 2022 was Pinegrove (for the \~3rd time in a row? At least for top 5), however, I feel like I didn't actually listen to Pinegrove all that frequently in the year 2022.
+
+Spotify is not very forthcoming with regards to how they calculate their stats. For this reason, wanted to investigate the data itself using the quantitative modeling skills that I acquired during my horribly expensive MPH.
+
+There are a couple of routes I took to explore my Spotify data. First, and most simply, I used the <!--# spotifyR --> package, which is a Spotify API wrapper for R. Then, I explored the data directly after downloading it from Spotify.
+
+Here's the short of it: Spotify uses a lot of weird terminology when it comes to how they code their API, which made it difficult to parse the stats using <!--# spotifyR -->. <!--# spotifyR --> basically just recapitulates the original wrapped data, which makes sense given that the wrapped data is probably just an algorithm that accesses the Spotify API. However, using the data that you can download directly from Spotify, one can get a much more interesting picture of their listening habits.
+
+Let's delve into it!
+
+## <!--# Using spotifyR -->
