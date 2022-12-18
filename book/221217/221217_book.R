@@ -38,7 +38,7 @@ library(plotly)
   ## While I'm waiting for the full dataset, I'll play around with the 'recent'
   ## dataset
 
-
+setwd("~/R/Projects/SpotRfy/book/221217/")
 source("../SpotRfy/scripts/221212_dont_upload.R")
 get_spotify_credentials()
 
@@ -85,14 +85,15 @@ top50lt <- top50lt %>%
 top50lt$rank <- 1:nrow(top50lt)
 
 ## Plotting duration by rank
-ggplotly(
-  ggplot(top50lt, aes(x = rank, y = duration_m, fill = artist.name, color = name)) +
+# ggplotly(
+duration <- ggplot(top50lt, aes(x = rank, y = duration_m, fill = artist.name, color = name)) +
     geom_bar(stat = 'identity') +
     theme_light() +
     theme(legend.position = 'none') +
     ylab("duration (min)") +
     ggtitle("Duration by Rank")
-)
+# )
+ggsave("221217_duration.png")
 
 ggplot(top50lt, aes(x = rank, y = duration_m, fill = artist.name, color = name)) +
   geom_bar(stat = 'identity') +
