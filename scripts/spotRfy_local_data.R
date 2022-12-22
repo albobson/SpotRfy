@@ -1,8 +1,8 @@
 ## Scripts to work with locally downloaded data
 
 ## Import the spotify streaming data
-    ## The filepath needs to be the path to the file where the downloaded 
-    ## data is stored
+## The filepath needs to be the path to the file where the downloaded 
+## data is stored
 import_spotify_streaming_data <- function(datafile) {
   
   stream_files  <- list.files(path=as.character(datafile),
@@ -12,7 +12,7 @@ import_spotify_streaming_data <- function(datafile) {
   
   ## Create a null dataset to store the streaming data
   data <- NULL
-
+  
   ## For loop to extract from however many files you have
   for(i in 1:length(stream_files)) {
     new_data <- jsonlite::fromJSON(stream_files[i])
@@ -23,8 +23,8 @@ import_spotify_streaming_data <- function(datafile) {
 }
 
 ## Clean spotify streaming data
-    ## This will add the various minutes/seconds columns and date column
-    ## Need to specify desired timezone
+## This will add the various minutes/seconds columns and date column
+## Need to specify desired timezone
 
 clean_spotify_streaming_data <- function(data, your_timezone) {
   ## Time is in ms, changing to minutes or seconds
@@ -59,7 +59,7 @@ clean_spotify_streaming_data <- function(data, your_timezone) {
 }
 
 ## A function to plot streams by time of day and date
-    ## artist_cutoff - must specify how many of your top artists to show
+## artist_cutoff - must specify how many of your top artists to show
 
 plot_streaming_timeofday <- function(clean_stream_data, artist_cutoff) {
   func_df <- clean_stream_data
@@ -71,30 +71,30 @@ plot_streaming_timeofday <- function(clean_stream_data, artist_cutoff) {
     distinct() %>%
     arrange(desc(sum_min_per_artist)) %>%
     top_n(n = artist_cutoff, wt = sum_min_per_artist)
-
+  
   # return(artist_names)
-
+  
   func_df$artistName <- ifelse(func_df$artistName %in% artist_names$artistName,
                                func_df$artistName, NA)
-
+  
   func_df$trackName <- ifelse(func_df$artistName %in% artist_names$artistName,
                               func_df$artistName, NA)
-
+  
   # return(func_df)
-
+  
   plot1 <- ggplotly(
     ggplot(func_df, aes(x = day_endtime, y = hour, color = artistName)) +
       geom_point() +
       scale_y_continuous(limits = c(0, 24), breaks = (0:12)*2) +
       theme_light()
   )
-
+  
   return(plot1)
   
 }
 
 ## A function to plot a barplot of each artist's time listened stacked by songs
-    ## artist_cutoff - must specify how many of your top artists to show
+## artist_cutoff - must specify how many of your top artists to show
 plot_streaming_artists <- function(clean_stream_data, artist_cutoff) {
   
   artist_names <- clean_stream_data %>%
