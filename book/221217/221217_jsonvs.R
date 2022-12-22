@@ -178,10 +178,14 @@ all_ta <- tracks_sel %>%
 
 ## Filtering to just artists that I listened to more than 100 songs
 all_ta100 <- all_ta %>%
-  filter(numb_songs >=100, artistName != "Exodar")
+  filter(numb_songs >=100, artistName != "Exodar") %>%
+  select(trackName, artistName, sum_min_per_artist, sum_min_per_song, numb_songs, num_times_song_played) %>%
+  distinct()
 
 ex <- all_ta %>%
   filter(artistName == "Exodar")
+
+
 
 ## Total minutes played
 ggplotly(

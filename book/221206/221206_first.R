@@ -61,7 +61,7 @@ get_my_recently_played(limit = 5) %>%
 
 # Top artists
 get_my_top_artists_or_tracks(type = 'artists', time_range = 'long_term', limit = 25) %>% 
-  select(name, genres) %>% 
+  # select(name, genres) %>% 
   rowwise %>% 
   mutate(genres = paste(genres, collapse = ', ')) %>% 
   ungroup %>%

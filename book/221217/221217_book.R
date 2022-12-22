@@ -39,7 +39,7 @@ library(plotly)
   ## dataset
 
 setwd("~/R/Projects/SpotRfy/book/221217/")
-source("../SpotRfy/scripts/221212_dont_upload.R")
+source("~/R/Projects/SpotRfy/scripts/221212_dont_upload.R")
 get_spotify_credentials()
 
 access_token <- get_spotify_access_token()
