@@ -15,10 +15,36 @@ Every year, Spotify releases an end of the year "Spotify Wrapped", which is a co
 
 Spotify is not very forthcoming with regards to how they calculate their stats. For this reason, wanted to investigate the data itself using the quantitative modeling skills that I acquired during my horribly expensive MPH.
 
-There are a couple of routes I took to explore my Spotify data. First, and most simply, I used the <!--# spotifyR --> package, which is a Spotify API wrapper for R. Then, I explored the data directly after downloading it from Spotify.
+There are a couple of routes one could take to explore their Spotify data. First, and most simply, there is the `spotifyR` package, which is a Spotify API wrapper for R. Alternatively, one could download their data directly from [Spotify](https://www.spotify.com/us/account/privacy/) and then work with it directly.
 
-Here's the short of it: Spotify uses a lot of weird terminology when it comes to how they code their API, which made it difficult to parse the stats using <!--# spotifyR -->. <!--# spotifyR --> basically just recapitulates the original wrapped data, which makes sense given that the wrapped data is probably just an algorithm that accesses the Spotify API. However, using the data that you can download directly from Spotify, one can get a much more interesting picture of their listening habits.
+Here's the short of it: Spotify uses a lot of weird terminology when it comes to how they code their API, which made it difficult to parse the stats using `spotifyR`. The Spotify API only allows you to query 50 things at a time, and I can imagine that over the lifetime of my account, I've streamed multiple hundreds of thousands of songs. Using the data that you can download directly from Spotify, one can get a much more interesting picture of their listening habits.
 
-Let's delve into it!
+Let's delve into it! Shoot me a message if you want help downloading your Spotify data.
 
-## <!--# Using spotifyR -->
+## Results
+
+#### Timeline
+
+My primary interest was in visualizing when and what I listened to over the past year. I wrote the `plot_my_timeline()` function, which creates a ggplot/plotly object that is interactive, allowing you to turn certain data on and off.
+
+```{r}
+plot_my_timeline(myData)
+```
+
+By default, the plot only highlights music artists that encompass the top 80th percentile of your listening history (in the input dataset). This is because it almost becomes meaningless to highlight *all* of the artists you've ever listened to. I found that the top 80th percentile was good enough for me. If you would like to change it to a different percentile, set the variable `percentile` equal to the desired percentile (i.e. `percentile = 0.9` for the 90th percentile).
+
+If you click on an artist (or on "Artists Below Threshold") you can remove that artist from the overall plot. If you double click on an artist, you can isolate that artist's data on the plot.
+
+I have plans to incorporate a slider at the bottom of the plot which will allow you to change the time frame.
+
+Interestingly, you can see my sleep/wake habits from the data. You can also see the night that I played white noise to down out my loud neighbors. I also noticed that I tended to listen to artists around the time that they released a new album.
+
+#### Barplot of Artists and their songs
+
+I also wanted to visualize how each song contributed to the overall listening time for each artist. To do this, I wrote the `plot_artists_bar()` function. This visualizes the total amount of time listened to each the top 80th percentile of artists. If you hover over the bars, you can see how much each song from that artist contributed to the overall time listened to said artist.
+
+```{r}
+plot_artists_bar(myData)
+```
+
+Similar to the previous function, if you would like to plot a greater number of artists, you can change the `percentile` variable.

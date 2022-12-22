@@ -15,7 +15,7 @@ library(spotifyr)
 library(plotly)
 library(jsonlite)
 
-setwd("~/R/Projects/SpotRfy/book/221217/")
+setwd("~/R/Projects/SpotRfy/book/221220/")
 
 source("~/R/Projects/SpotRfy/scripts/221212_dont_upload.R")
 
@@ -67,6 +67,10 @@ data1 <- data %>%
 data1$artistName <- ifelse(data1$sum_min_per_artist < quantile(data1$sum_min_per_artist, 0.8), 
                            NA, data1$artistName)
 
+data1$trackName <- ifelse(data1$sum_min_per_artist < quantile(data1$sum_min_per_artist, 0.8), 
+                          NA, data1$trackName)
+
+## MAKE a feature that includes song names
 ggplotly(
   ggplot(data1, aes(x = day_endtime, y = hour, color = artistName)) +
     geom_point() +
@@ -75,3 +79,33 @@ ggplotly(
 )
 
 ## IT WORKED
+
+
+## Filtering to just artists that I listened to more than 100 songs
+all_ta100 <- all_ta %>%
+  filter(numb_songs >=100, artistName != "Exodar") %>%
+  select(trackName, artistName, sum_min_per_artist, sum_min_per_song, numb_songs, num_times_song_played) %>%
+  distinct()
+
+ex <- all_ta %>%
+  filter(artistName == "Exodar")
+
+
+
+## Total minutes played
+ggplotly(
+  ggplot(all_ta100, 
+         aes(x = reorder(artistName, -sum_min_per_artist), 
+             y = sum_min_per_song, fill = trackName)) +
+    geom_bar(stat = 'identity', position = 'stack', ) +
+    theme(axis.text.x = element_text(angle = 90), legend.position = 'none') +
+    ggtitle("Total Minutes of song played by each artist")
+)
+
+## Total minutes played
+ggplotly(
+  ggplot(all_ta100, aes(x = artistName, y = num_times_song_played, fill = trackName)) +
+    geom_bar(stat = 'identity', position = 'stack') +
+    theme(axis.text.x = element_text(angle = 90), legend.position = 'none') +
+    ggtitle("Total Minutes of song played by each artist")
+)
