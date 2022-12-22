@@ -19,5 +19,5 @@ test_plot1 <- plot_streaming_timeofday(test_clean, artist_cutoff = 20)
 test_plot1
 
 ## A function to plot the bar plot data
-test_plot2 <- plot_streaming_artists(test_clean, artist_cutoff = 20)
+test_plot2 <- plot_streaming_artists(test_clean, artist_cutoff = 10)
 test_plot2

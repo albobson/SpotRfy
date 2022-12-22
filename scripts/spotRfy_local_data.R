@@ -122,8 +122,11 @@ plot_streaming_artists <- function(clean_stream_data, artist_cutoff) {
            aes(x = reorder(artistName, -sum_min_per_artist), 
                y = sum_min_per_song, fill = trackName)) +
       geom_bar(stat = 'identity', position = 'stack', ) +
+      theme_light() +
       theme(axis.text.x = element_text(angle = 90), legend.position = 'none') +
-      ggtitle("Total Minutes of song played by each artist")
+      ggtitle("Total Minutes of song played by each artist") +
+      ylab("Total time listened to artist (min)") +
+      xlab("")
   )
   
 }
