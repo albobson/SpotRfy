@@ -26,7 +26,7 @@ import_spotify_streaming_data <- function(datafile) {
 ## This will add the various minutes/seconds columns and date column
 ## Need to specify desired timezone
 
-clean_spotify_streaming_data <- function(data, your_timezone) {
+clean_spotify_streaming_data <- function(data, your_timezone = "PST") {
   ## Time is in ms, changing to minutes or seconds
   data$min_played <- data$msPlayed/60/1000
   data$sec_played <- data$msPlayed/1000

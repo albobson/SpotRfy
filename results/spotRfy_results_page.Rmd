@@ -1,50 +1,76 @@
 ---
-title: "spotRfy_results_page"
+title: "SpotRfy"
 author: "Alexander Robertson"
-date: "2022-12-05"
+date: "2022-12-22"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+setwd("C:/Users/meowy/OneDrive/Documents/R/Projects/SpotRfy/results/")
+
+source("C:/Users/meowy/OneDrive/Documents/R/Projects/SpotRfy/scripts/spotRfy_master.R")
 ```
 
 ## Background
 
-Every year, Spotify releases an end of the year "Spotify Wrapped", which is a collection of stats on regarding your listening habits over the past year. A few friends and I feel like the stats are a little fishy, or at least, aren't entirely expected. For example, my top artist of the year in 2022 was Pinegrove (for the \~3rd time in a row? At least for top 5), however, I feel like I didn't actually listen to Pinegrove all that frequently in the year 2022.
+Every year, Spotify releases an end of the year "Spotify Wrapped", which is a collection of stats regarding your listening habits over the past year. A few friends and I felt like this year's stats were a little fishy, or at least, weren't entirely expected. For example, my top artist of the year in 2022 was Pinegrove, however, I feel like I didn't actually listen to Pinegrove all that frequently in the year 2022.
 
-Spotify is not very forthcoming with regards to how they calculate their stats. For this reason, wanted to investigate the data itself using the quantitative modeling skills that I acquired during my horribly expensive MPH.
+Spotify is not very forthcoming with regards to how they calculate their stats. For this reason, I wanted to investigate the data myself using the quantitative modeling skills that I acquired during my horribly expensive MPH.
 
-There are a couple of routes one could take to explore their Spotify data. First, and most simply, there is the `spotifyR` package, which is a Spotify API wrapper for R. Alternatively, one could download their data directly from [Spotify](https://www.spotify.com/us/account/privacy/) and then work with it directly.
+There are a couple of routes one could take to explore their Spotify data. There is the `spotifyR` package, which is a Spotify API wrapper for R. Alternatively, one could [download their data directly from Spotify](https://www.spotify.com/us/account/privacy/) and then work with it directly.
 
-Here's the short of it: Spotify uses a lot of weird terminology when it comes to how they code their API, which made it difficult to parse the stats using `spotifyR`. The Spotify API only allows you to query 50 things at a time, and I can imagine that over the lifetime of my account, I've streamed multiple hundreds of thousands of songs. Using the data that you can download directly from Spotify, one can get a much more interesting picture of their listening habits.
+Here's the short of it: Spotify uses a lot of weird terminology when it comes to how they code their API, which made it difficult to parse the stats using `spotifyR`. The Spotify API only allows you to make 50 queries at a time, and I can imagine that over the lifetime of my account I've streamed multiple hundreds of thousands of songs. For this reason, I have focused on the downloadable data for now.
 
 Let's delve into it! Shoot me a message if you want help downloading your Spotify data.
 
 ## Results
 
+I've made a master script which I use to source all of my functions. This keeps things tidy. If you'd like to run this on your own, first make sure to call `source()` on wherever you've placed the `spotRfy_master.R` script. Then, you can use the `get_spotify_streaming_data()` function to create a data frame of the streaming data from your downloaded and extracted Spotify data (make sure to change the `datafile` file path to wherever your data was downloaded). Then, run the data through the `clean_spotify_streaming_data()` function and specify your local timezone. By default, the timezone is PST.
+
+```{r}
+# source("../scripts/spotRfy_master.R")
+
+myStreamingData <- import_spotify_streaming_data(datafile = "../data/lasty")
+
+myCleanData <- clean_spotify_streaming_data(data = myStreamingData, your_timezone = "EST")
+```
+
+Now we have a data set that is ready for plotting.
+
 #### Timeline
 
-My primary interest was in visualizing when and what I listened to over the past year. I wrote the `plot_my_timeline()` function, which creates a ggplot/plotly object that is interactive, allowing you to turn certain data on and off.
+My primary interest was in visualizing when and what I listened to over the past year. I wrote the `plot_streaming_timeofday()` function, which creates a ggplot/plotly object that is interactive, allowing you to turn certain data on and off. It also allows you to hover over individual points to see what song/artist you were listening to.
 
 ```{r}
-plot_my_timeline(myData)
+plot_streaming_timeofday(myCleanData, artist_cutoff = 10)
 ```
 
-By default, the plot only highlights music artists that encompass the top 80th percentile of your listening history (in the input dataset). This is because it almost becomes meaningless to highlight *all* of the artists you've ever listened to. I found that the top 80th percentile was good enough for me. If you would like to change it to a different percentile, set the variable `percentile` equal to the desired percentile (i.e. `percentile = 0.9` for the 90th percentile).
+By default, the plot only highlights music artists that encompass your top 10 most listened to artists (by total minutes listened). This is because it becomes very difficult to interpret the plot while highlighting *all* of the artists you've ever listened to. I found that the top 10 was a good amount. If you would like to change it to a different cutoff, set the variable `cutoff` equal to the desired number of artists (i.e. `cutoff = 15` for your top 15 artists).
 
-If you click on an artist (or on "Artists Below Threshold") you can remove that artist from the overall plot. If you double click on an artist, you can isolate that artist's data on the plot.
+If you click on an artist (or on "Artists Under Top Cutoff") you can remove that artist from the overall plot. If you double click on an artist, you can isolate that artist's data on the plot.
 
-I have plans to incorporate a slider at the bottom of the plot which will allow you to change the time frame.
+I have plans to incorporate a slider at the bottom of the plot which will allow you to change the time frame. Additionally, I would like to include album data, however that will take integration with the Spotify API and I haven't written the function to do that as of yet.
 
-Interestingly, you can see my sleep/wake habits from the data. You can also see the night that I played white noise to down out my loud neighbors. I also noticed that I tended to listen to artists around the time that they released a new album.
+Interestingly, you can see my sleep/wake habits from the data (note how they shifted around \~July when I moved from the East Coast to the West Coast). You can also see the night that I played white noise to down out my loud neighbors (on 10/22/22, shout out to Baby Sleep Noise 5).
 
-#### Barplot of Artists and their songs
+#### Bar Plot of Artists and their songs
 
-I also wanted to visualize how each song contributed to the overall listening time for each artist. To do this, I wrote the `plot_artists_bar()` function. This visualizes the total amount of time listened to each the top 80th percentile of artists. If you hover over the bars, you can see how much each song from that artist contributed to the overall time listened to said artist.
+I wanted to visualize how each artist's song contributed to the overall listening time for that artist. To do this, I wrote the `plot_streaming_artists()` function. This visualizes the total amount of time listened to each artist. If you hover over the bars, you can see how much each song from that artist contributed to the overall time listened to said artist.
 
 ```{r}
-plot_artists_bar(myData)
+plot_streaming_artists(myCleanData, artist_cutoff = 10)
 ```
 
-Similar to the previous function, if you would like to plot a greater number of artists, you can change the `percentile` variable.
+Turns out I did listen to a lot of Pinegrove this year!
+
+Similar to the previous function, if you would like to plot a greater number of artists, you can change the `cutoff` variable.
+
+I would like to include the ability to color by album, however that will need to be done in the future when I integrate the API.
+
+## Future Directions
+
+I would like to write a function that downloads the metadata of the songs that you've listened to from the Spotify API, but that is proving to be tricky and may not be easy to implement for everyone.
+
+If you have other ideas for how I could improve the code, let me know!

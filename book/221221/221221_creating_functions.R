@@ -2,9 +2,10 @@
 
 library(dplyr)
 
+
 setwd("~/R/Projects/SpotRfy/book/221221")
 
-source("~/R/Projects/SpotRfy/scripts/spotRfy_local_data.R")
+source("~/R/Projects/SpotRfy/scripts/spotRfy_master.R")
 
 
 ## A function to import data
@@ -15,7 +16,7 @@ test_clean <- clean_spotify_streaming_data(data = test, your_timezone = "EST")
 test_clean
 
 ## A function to plot the time series data
-test_plot1 <- plot_streaming_timeofday(test_clean, artist_cutoff = 20)
+test_plot1 <- plot_streaming_timeofday(test_clean)
 test_plot1
 
 ## A function to plot the bar plot data
