@@ -1,4 +1,4 @@
-                            ## 22-12-22 ##
+                            ## 22-12-23 ##
 
           ## Script to parse through downloaded Spotify code ##
 
@@ -12,7 +12,7 @@ library(plotly)
 
 #### Scripts to work with locally downloaded data ####
 
-## Import the spotify streaming data
+## Import the Spotify "short-term" data
     ## The filepath needs to be the path to the file where the downloaded 
     ## data is stored
 import_spotify_streaming_data <- function(datafile) {
@@ -34,40 +34,143 @@ import_spotify_streaming_data <- function(datafile) {
   return(data)
 }
 
+## Import the Spotify "long-term" data
+    ## Note: The short term and long term datasets are coded slightly differently
+    ## making it necessary for two different functions.
+
+    ## Additionally, the long term data makes it much easier to delineate between
+    ## podcasts and normal songs by the way the variables are coded.
+
+## Import the data
+import_lifetime_streaming_data <- function(datafile) {
+  
+  stream_files  <- list.files(path=as.character(datafile),
+                              recursive=T,
+                              pattern='endsong_*',
+                              full.names=T)
+  
+  ## Create a null dataset to store the streaming data
+  data <- NULL
+  
+  ## For loop to extract from however many files you have
+  for(i in 1:length(stream_files)) {
+    new_data <- jsonlite::fromJSON(stream_files[i])
+    data <- rbind(data, new_data)
+    data
+  }
+  return(data)
+}
+
+## Isolate just tracks
+get_lifetime_tracks <- function(lifetime_data) {
+  new_df <- NULL
+  new_df <- lifetime_data %>%
+    mutate(endTime= ts, 
+           msPlayed = ms_played, 
+           trackName = master_metadata_track_name, 
+           albumName = master_metadata_album_album_name,
+           artistName = master_metadata_album_artist_name) %>%
+    select(endTime,
+           msPlayed,
+           trackName,
+           albumName,
+           artistName,
+           reason_start,
+           reason_end,
+           shuffle,
+           skipped,
+           offline,
+           offline_timestamp,
+           incognito_mode, 
+           spotify_track_uri) %>%
+    filter_at(vars(trackName, artistName), all_vars(!is.na(.)))
+  return(new_df)
+}
+
+## Isolate just podcasts
+get_lifetime_podcasts <- function(lifetime_data) {
+  new_df <- NULL
+  new_df <- lifetime_data %>%
+    mutate(endTime= ts, 
+           msPlayed = ms_played, 
+           episodeName = episode_name, 
+           showName = episode_show_name) %>%
+    select(endTime,
+           msPlayed,
+           episodeName,
+           showName,
+           reason_start,
+           reason_end,
+           shuffle,
+           skipped,
+           offline,
+           offline_timestamp,
+           incognito_mode) %>%
+    filter_at(vars(episodeName, showName), all_vars(!is.na(.)))
+  return(new_df)
+}
+
+
+
 ## Clean Spotify streaming data
     ## This will add the various minutes/seconds columns and date column
     ## Need to specify desired timezone (eg. "PST")
 
-clean_spotify_streaming_data <- function(data, your_timezone) {
+clean_spotify_streaming_data <- function(data, your_timezone, data_length = "recent") {
+  new_data <- NULL
+  new_data <- data
   ## Time is in ms, changing to minutes or seconds
-  data$min_played <- data$msPlayed/60/1000
-  data$sec_played <- data$msPlayed/1000
+  new_data$min_played <- new_data$msPlayed/60/1000
+  new_data$sec_played <- new_data$msPlayed/1000
   
-  ## Spotify data is recorded in UTC, need to convert to a different time
-  data$dif_endtime <- lubridate::ymd_hm(data$endTime, tz = "UTC")
-  data$dif_endtime <- with_tz(data$dif_endtime, tzone = as.character(your_timezone))
+  ifelse(data_length == "recent", {
+  
+  ## Spotify new_data is recorded in UTC, need to convert to a different time
+  new_data$dif_endtime <- lubridate::ymd_hm(new_data$endTime, tz = "UTC")
+  new_data$dif_endtime <- with_tz(new_data$dif_endtime, tzone = as.character(your_timezone))
   
   ## Adding columns to break apart the date and time
   ## Extracting just the hour-min characters
-  data$hm_endtime <- substr(data$dif_endtime, 11, 16)
-  data$hm_endtime <- lubridate::hm(data$hm_endtime)
-  data$day_endtime <- substr(data$dif_endtime, 1, 10)
-  data$day_endtime <- ymd(data$day_endtime)
+  new_data$hm_endtime <- substr(new_data$dif_endtime, 11, 16)
+  new_data$hm_endtime <- lubridate::hm(new_data$hm_endtime)
+  new_data$day_endtime <- substr(new_data$dif_endtime, 1, 10)
+  new_data$day_endtime <- ymd(new_data$day_endtime)
   
   ## Time of day played
-  data$time <- as.numeric(data$hm_endtime)
-  data$hour <- data$time*24/86340
+  new_data$time <- as.numeric(new_data$hm_endtime)
+  new_data$hour <- new_data$time*24/86340
   
-  data1 <- data %>%
+  }, ifelse(data_length == "lifetime", {
+    new_data$endTime <- paste0(substr(new_data$endTime, 1, 10), " ", substr(new_data$endTime, 12, 19))
+    
+    ## Spotify new_data is recorded in UTC, need to convert to a different time
+    new_data$dif_endtime <- lubridate::ymd_hms(new_data$endTime, tz = "UTC")
+    new_data$dif_endtime <- with_tz(new_data$dif_endtime, tzone = as.character(your_timezone))
+    
+    ## Adding columns to break apart the date and time
+    ## Extracting just the hour-min characters
+    new_data$hm_endtime <- substr(new_data$dif_endtime, 11, 16)
+    new_data$hm_endtime <- lubridate::hm(new_data$hm_endtime)
+    new_data$day_endtime <- substr(new_data$dif_endtime, 1, 10)
+    new_data$day_endtime <- ymd(new_data$day_endtime)
+    
+    ## Time of day played
+    new_data$time <- as.numeric(new_data$hm_endtime)
+    new_data$hour <- new_data$time*24/86340
+    
+  }, NA))
+  
+  
+  new_data1 <- new_data %>%
     group_by(artistName) %>%
     dplyr::mutate(sum_min_per_artist = sum(min_played), numb_songs = n()) %>%
     dplyr::arrange(desc(sum_min_per_artist)) %>% 
-    group_by(trackName, .add = TRUE) %>%
+    dplyr::group_by(trackName, .add = TRUE) %>%
     dplyr::mutate(sum_min_per_song = sum(min_played), num_times_song_played = n()) %>%
     dplyr::arrange(desc(sum_min_per_artist)) %>%
     dplyr::ungroup()
   
-  return(data1)
+  return(new_data1)
 }
 
 ## A function to plot streams by time of day and date
